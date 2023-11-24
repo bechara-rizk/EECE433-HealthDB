@@ -7,6 +7,25 @@
 
 
 {% block content %}
+hi
+<!-- <button onclick="func()">
+    press me
+</button> -->
+
+{% endblock %}
 
 
+{% block js %}
+<script>
+    function func() {
+        // make a request to api
+        req = new XMLHttpRequest();
+        req.open('GET', 'http://127.0.0.1:8000/healthdb/api/', true);
+        req.send();
+        // alert data
+        req.onload = function () {
+            alert(req.responseText);
+        }
+    }
+</script>
 {% endblock %}
