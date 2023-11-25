@@ -4,68 +4,487 @@
 
 {% block css %}
 <style>
-    .row{
-        padding: 0 20px 10px 20px;
-    }
-    @media screen and (min-width: 794px) {
-        .col{
-          /* padding: 0 1%;
+  .row {
+    padding: 0 20px 10px 20px;
+    margin-bottom: 20px;
+  }
+
+  @media screen and (min-width: 794px) {
+
+    .col,
+    .row1 {
+      /* padding: 0 1%;
           width: 48%; */
-          max-height: 300px;
-          overflow-y: scroll;
-          overflow-x: hidden;
-      }
-      .table > thead {
-        position: sticky;
-        top: 0;
-      }
+      max-height: 300px;
+      overflow-y: scroll;
+      overflow-x: hidden;
     }
+
+    .table>thead {
+      position: sticky;
+      top: 0;
+    }
+  }
+  @media screen and (max-width: 795px) {
+    .row1 {
+      max-height: 300px;
+      overflow-y: scroll;
+      overflow-x: scroll;
+    }
+  }
 </style>
 {% endblock %}
 
 
 {% block content %}
+<div class="row row1">
+  <table class="table">
+    <thead>
+      <tr>
+        {% for header in employeesTitles %}
+        <th scope="col">{{header}}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in employees %}
+      <tr>
+        {% for col in row %}
+        <td>{{col}}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
 <div class="row">
-    <div class="col">
-        <table class="table">
-            <thead>
-              <tr>
-                {% for header in doctorHeaders %}
-                <th scope="col">{{header}}</th>
-                {% endfor %}
-              </tr>
-            </thead>
-            <tbody>
-              {% for row in doctorData %}
-                <tr>
-                    {% for col in row %}
-                    <td>{{col}}</td>
-                    {% endfor %}
-                </tr>
-              {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <div class="col">
-        <table class="table">
-            <thead>
-              <tr>
-                {% for header in patientHeaders %}
-                <th scope="col">{{header}}</th>
-                {% endfor %}
-              </tr>
-            </thead>
-            <tbody>
-              {% for row in patientData %}
-                <tr>
-                    {% for col in row %}
-                    <td>{{col}}</td>
-                    {% endfor %}
-                </tr>
-              {% endfor %}
-            </tbody>
-        </table>
-    </div>
+  <div class="col">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for header in departmentsTitles %}
+          <th scope="col">{{header}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in departments %}
+        <tr>
+          {% for col in row %}
+          <td>{{col}}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for header in brokersTitles %}
+          <th scope="col">{{header}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in brokers %}
+        <tr>
+          {% for col in row %}
+          <td>{{col}}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row row1">
+  <table class="table">
+    <thead>
+      <tr>
+        {% for header in customersTitles %}
+        <th scope="col">{{header}}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in customers %}
+      <tr>
+        {% for col in row %}
+        <td>{{col}}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="row">
+  <div class="col">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for header in family_membersTitles %}
+          <th scope="col">{{header}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in family_members %}
+        <tr>
+          {% for col in row %}
+          <td>{{col}}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for header in labsTitles %}
+          <th scope="col">{{header}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in labs %}
+        <tr>
+          {% for col in row %}
+          <td>{{col}}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for header in hospitalsTitles %}
+          <th scope="col">{{header}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in hospitals %}
+        <tr>
+          {% for col in row %}
+          <td>{{col}}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for header in doctorsTitles %}
+          <th scope="col">{{header}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in doctors %}
+        <tr>
+          {% for col in row %}
+          <td>{{col}}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row row1">
+  <table class="table">
+    <thead>
+      <tr>
+        {% for header in plansTitles %}
+        <th scope="col">{{header}}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in plans %}
+      <tr>
+        {% for col in row %}
+        <td>{{col}}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="row">
+  <div class="col">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for header in billsTitles %}
+          <th scope="col">{{header}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in bills %}
+        <tr>
+          {% for col in row %}
+          <td>{{col}}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for header in paysTitles %}
+          <th scope="col">{{header}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in pays %}
+        <tr>
+          {% for col in row %}
+          <td>{{col}}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for header in insuresTitles %}
+          <th scope="col">{{header}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in insures %}
+        <tr>
+          {% for col in row %}
+          <td>{{col}}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for header in coversTitles %}
+          <th scope="col">{{header}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in covers %}
+        <tr>
+          {% for col in row %}
+          <td>{{col}}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for header in works_inTitles %}
+          <th scope="col">{{header}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in works_in %}
+        <tr>
+          {% for col in row %}
+          <td>{{col}}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for header in acceptsTitles %}
+          <th scope="col">{{header}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in accepts %}
+        <tr>
+          {% for col in row %}
+          <td>{{col}}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for header in testsTitles %}
+          <th scope="col">{{header}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in tests %}
+        <tr>
+          {% for col in row %}
+          <td>{{col}}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for header in lab_locationsTitles %}
+          <th scope="col">{{header}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in lab_locations %}
+        <tr>
+          {% for col in row %}
+          <td>{{col}}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for header in customer_diseasesTitles %}
+          <th scope="col">{{header}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in customer_diseases %}
+        <tr>
+          {% for col in row %}
+          <td>{{col}}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for header in customer_exclusionsTitles %}
+          <th scope="col">{{header}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in customer_exclusions %}
+        <tr>
+          {% for col in row %}
+          <td>{{col}}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for header in f_member_diseasesTitles %}
+          <th scope="col">{{header}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in f_member_diseases %}
+        <tr>
+          {% for col in row %}
+          <td>{{col}}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for header in operates_onTitles %}
+          <th scope="col">{{header}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in operates_on %}
+        <tr>
+          {% for col in row %}
+          <td>{{col}}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 
 {% endblock %}
@@ -73,6 +492,6 @@
 
 {% block js %}
 <script>
-    
+
 </script>
 {% endblock %}
