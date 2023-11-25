@@ -3,29 +3,43 @@
 {% block title %}Home page{% endblock %}
 
 {% block css %}
+
 {% endblock %}
 
 
 {% block content %}
-hi
-<!-- <button onclick="func()">
-    press me
-</button> -->
+<h1>Welcome to HealthDB!</h1>
+
+<h4>HealthDB is a database system for managing an insurance company's data.</h4>
+
+<p>Some statistics of the datbase:</p>
+
+<div id="stats">
+
+</div>
 
 {% endblock %}
 
 
 {% block js %}
 <script>
-    function func() {
-        // make a request to api
-        req = new XMLHttpRequest();
-        req.open('GET', 'http://127.0.0.1:8000/healthdb/api/', true);
-        req.send();
-        // alert data
-        req.onload = function () {
-            alert(req.responseText);
-        }
+    window.onload = loadData();
+    function loadData() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("GET", "/healthdb/api/home/", true);
+        xhttp.send();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var stats = JSON.parse(this.responseText);
+                document.getElementById("stats").innerHTML = "<p>Number of employees: " + stats["employees"] + "</p>" +
+                    "<p>Number of departments: " + stats["departments"] + "</p>" +
+                    "<p>Number of customers: " + stats["customers"] + "</p>" +
+                    "<p>Number of doctors: " + stats["doctors"] + "</p>" +
+                    "<p>Number of hospitals: " + stats["hospitals"] + "</p>" +
+                    "<p>Number of labs: " + stats["labs"] + "</p>" +
+                    "<p>Number of different insurance plans: " + stats["plans"] + "</p>";
+            }
+        };
     }
 </script>
 {% endblock %}

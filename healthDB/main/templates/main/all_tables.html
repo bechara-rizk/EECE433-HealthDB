@@ -1,0 +1,78 @@
+{% extends "main/default.html" %}
+
+{% block title %}All tables{% endblock %}
+
+{% block css %}
+<style>
+    .row{
+        padding: 0 20px 10px 20px;
+    }
+    @media screen and (min-width: 794px) {
+        .col{
+          /* padding: 0 1%;
+          width: 48%; */
+          max-height: 300px;
+          overflow-y: scroll;
+          overflow-x: hidden;
+      }
+      .table > thead {
+        position: sticky;
+        top: 0;
+      }
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="row">
+    <div class="col">
+        <table class="table">
+            <thead>
+              <tr>
+                {% for header in doctorHeaders %}
+                <th scope="col">{{header}}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in doctorData %}
+                <tr>
+                    {% for col in row %}
+                    <td>{{col}}</td>
+                    {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="col">
+        <table class="table">
+            <thead>
+              <tr>
+                {% for header in patientHeaders %}
+                <th scope="col">{{header}}</th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in patientData %}
+                <tr>
+                    {% for col in row %}
+                    <td>{{col}}</td>
+                    {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block js %}
+<script>
+    
+</script>
+{% endblock %}
