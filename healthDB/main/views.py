@@ -1047,3 +1047,37 @@ def reclab(request):
         context['success']='Test recorded successfully'
         return render(request, 'main/reclab.html', context)
     
+def overdue(request):
+    context=dict()
+    out=sendQuery("""SELECT DISTINCT c.ssn, b.id FROM customer_table c
+INNER JOIN pays p ON c.ssn = p.c_ssn
+INNER JOIN bill_view b ON p.b_id = b.id
+WHERE ((b.still_due > 0) AND (b.date+days_to_pay < CURRENT_DATE));""")
+    ssns=[entry[0] for entry in out]
+    bills=[entry[1] for entry in out]
+
+    display=[]
+    for i in range(len(bills)):
+        remaining=sendQuery(f"SELECT still_due FROM bill_view WHERE id={bills[i]};")[0][0]
+        display.append(f'Bill with ID {bills[i]} for customer with SSN {ssns[i]} is overdue, with ${remaining} remaining to pay.')
+    context['display']=display
+
+    return render(request, 'main/overdue.html', context)
+
+def financial(request):
+    pass
+
+def uninsured(request):
+    pass
+
+def customerservice(request):
+    pass
+
+def teststats(request):
+    pass
+
+def operationstats(request):
+    pass
+
+def doctorstats(request):
+    pass

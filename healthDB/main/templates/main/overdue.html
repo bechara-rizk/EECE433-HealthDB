@@ -1,0 +1,26 @@
+{% extends "main/default.html" %}
+
+{% block title %}View overdue bills{% endblock %}
+
+{% block css %}
+
+{% endblock %}
+
+
+{% block content %}
+<h2>View overdue bills</h2>
+
+<ul>
+    {% for line in display %}
+    <li>{{line}}</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}
+
+
+{% block js %}
+<script>
+    
+</script>
+{% endblock %}

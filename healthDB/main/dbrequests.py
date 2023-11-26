@@ -38,9 +38,14 @@ def callFunction(functionName, *args):
         results=cursor.fetchall()
     except:
         results=False
+    notice=connection.notices
+    if len(notice)>0 and 'error' in notice[-1].lower():
+        notice=notice[-2]
+    else:
+        notice=False
     cursor.close()
     connection.close()
-    return results
+    return results, notice
 
 def callProcedure(procedureName, *args):
     global passwd

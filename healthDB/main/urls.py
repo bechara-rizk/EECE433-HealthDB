@@ -23,4 +23,11 @@ urlpatterns = [
     path('recpay/', views.recpay, name='recpay'),
     path('recope/', views.recope, name='recope'),
     path('reclab/', views.reclab, name='reclab'),
+    path('overdue/', views.overdue, name='overdue'),
+    path('financial/', views.financial, name='financial'),
+    path('uninsured/', views.uninsured, name='uninsured'),
+    path('customerservice/', views.customerservice, name='customerservice'),
+    path('teststats/', views.teststats, name='teststats'),
+    path('operationstats/', views.operationstats, name='operationstats'),
+    path('doctorstats/', views.doctorstats, name='doctorstats'),
 ]
