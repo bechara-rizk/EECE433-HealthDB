@@ -1,0 +1,95 @@
+{% extends "main/default.html" %}
+
+{% block title %}View plan info{% endblock %}
+
+{% block css %}
+<style>
+    .input-group {
+        max-width: 400px;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<h2>View information about an insurance plan</h2>
+
+<form method="POST" onsubmit="return false;">
+    {% csrf_token %}
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Insurance plan</span>
+        <select name="ins" required class="form-select" id="inschoice">
+            <option value="">Choose a plan</option>
+            {% for plans in plans %}
+            <option value="{{plans}}">{{plans}}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <button type="" class="btn btn-primary" onclick="getinfo()">Submit</button>
+
+</form>
+<br>
+<div id="info">
+
+</div>
+
+{% endblock %}
+
+
+{% block js %}
+<script>
+    function getinfo() {
+        var ins = document.getElementById("inschoice").value;
+        if (ins != "") {
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("POST", "/healthdb/viewins/", true);
+            xmlhttp.setRequestHeader("X-CSRFToken", "{{csrf_token}}");
+
+            xmlhttp.send(JSON.stringify({
+                "ins": ins
+            }));
+            xmlhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var data = JSON.parse(this.responseText);
+                    var text = "";
+                    text += "<h6>Name: " + data["name"] + "</h6>" +
+                        "<h6>Type: " + data["type"] + "</h6>" +
+                        "<h6>Description: " + data["description"] + "</h6>";
+
+                    text += "<table class=\"table\">\
+                                <thead>\
+                                    <tr>\
+                                    <th scope=\"col\">ID</th>\
+                                    <th scope=\"col\">Price ($)</th>\
+                                    <th scope=\"col\">Start age</th>\
+                                    <th scope=\"col\">End age</th>\
+                                    <th scope=\"col\">Percentage paid</th>\
+                                    <th scope=\"col\">Time limit</th>\
+                                    <th scope=\"col\">Financial limit ($)</th>\
+                                    </tr>\
+                                </thead>\
+                                <tbody>";
+                    for (var i = 0; i < data["plans"].length; i++) {
+                        text += "<tr><td>" + data["plans"][i][0] + "</td>" +
+                            "<td>" + data["plans"][i][1] + "</td>" +
+                            "<td>" + data["plans"][i][2] + "</td>" +
+                            "<td>" + data["plans"][i][3] + "</td>" +
+                            "<td>" + data["plans"][i][4] + "</td>" +
+                            "<td>" + data["plans"][i][5] + "</td>" +
+                            "<td>" + data["plans"][i][6] + "</td></tr>";
+                    }
+                    text+="</tbody>\
+                            </table>";
+
+                    document.getElementById("info").innerHTML = text;
+                }
+            }
+            xmlhttp.onerror = function () {
+                alert("An error occurred while trying to get the information.");
+            }
+        }
+    }
+</script>
+{% endblock %}

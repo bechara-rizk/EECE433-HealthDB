@@ -628,13 +628,147 @@ def viewbro(request):
         return JsonResponse(context)
 
 def viewcus(request):
-    pass
+    if request.method == 'GET':
+        context=dict()
+        customers=sendQuery("SELECT ssn, first_name, last_name FROM customer_table;")
+        context['customers']=[customer[1]+' '+customer[2]+', '+str(customer[0]) for customer in customers]
+        return render(request, 'main/viewcus.html', context)
+    
+    if request.method == 'POST':
+        context=dict()
+        body=request.body.decode('utf-8')
+        body=loads(body)
+        customer=body['cus']
+        try:
+            customerssn=int(customer.split(', ')[1])
+        except:
+            customerssn=-1
+        # print(customerssn)
+        info=sendQuery(f"SELECT ssn, first_name, last_name, phone, dob, address, b_phone, e_ssn, date_of_assignment FROM customer_table WHERE ssn={customerssn};")
+        ssn=info[0][0]
+        first_name=info[0][1]
+        last_name=info[0][2]
+        phone=info[0][3]
+        dob=info[0][4]
+        address=info[0][5]
+        b_phone=info[0][6]
+        e_ssn=info[0][7]
+        date_of_assignment=info[0][8]
+        context['ssn']=ssn
+        context['first_name']=first_name
+        context['last_name']=last_name
+        context['phone']=phone
+        context['dob']=datetime.datetime.strftime(dob, "%B %d, %Y")
+        context['age']=sendQuery(f"SELECT age from customer WHERE ssn={ssn};")[0][0]
+        context['address']=address
+        context['b_phone']=b_phone
+        context['e_ssn']=e_ssn
+        context['date_of_assignment']=datetime.datetime.strftime(date_of_assignment, "%B %d, %Y")
+
+        if b_phone:
+            brokername=sendQuery(f"SELECT name FROM broker_table WHERE phone={b_phone};")
+            brokername=brokername[0][0]
+            context['brokername']=brokername
+
+        employee=sendQuery(f"SELECT first_name, last_name, ssn FROM employee_table WHERE ssn={e_ssn};")
+        employee=employee[0][0]+' '+employee[0][1]+' '+str(employee[0][2])
+        context['employee']=employee
+
+        familymembers=sendQuery(f"SELECT first_name, last_name, age, relation FROM family_member WHERE c_ssn={ssn};")
+        context['familymembers']=familymembers
+
+        return JsonResponse(context)
 
 def viewdoc(request):
-    pass
+    if request.method == 'GET':
+        context=dict()
+        doctors=sendQuery("SELECT phone, first_name, last_name FROM doctor_table;")
+        context['doctors']=[doctor[1]+' '+doctor[2]+', '+str(doctor[0]) for doctor in doctors]
+        return render(request, 'main/viewdoc.html', context)
+    
+    if request.method == 'POST':
+        context=dict()
+        body=request.body.decode('utf-8')
+        body=loads(body)
+        doctor=body['doc']
+        try:
+            doctorphone=int(doctor.split(', ')[1])
+        except:
+            doctorphone=-1
+        # print(doctorphone)
+        info=sendQuery(f"SELECT phone, specialization, first_name, last_name, years_worked, nb_of_malpractices FROM doctor WHERE phone={doctorphone};")
+        phone=info[0][0]
+        specialization=info[0][1]
+        first_name=info[0][2]
+        last_name=info[0][3]
+        years_worked=info[0][4]
+        nb_of_malpractices=info[0][5]
+        context['phone']=phone
+        context['specialization']=specialization
+        context['first_name']=first_name
+        context['last_name']=last_name
+        context['years_worked']=years_worked
+        context['nb_of_malpractices']=nb_of_malpractices
+
+        context['operations']=sendQuery(f"SELECT COUNT(*) FROM operates_on WHERE d_phone={phone};")[0][0]
+
+        operations=sendQuery(f"""SELECT d.phone AS "Doctor phone nb", d.first_name||' '||d.last_name AS "Doctor name",
+COALESCE(h.name,'N/A') AS "Hospital name", COUNT(o.*) AS "Nb of operations"
+FROM doctor_table d
+LEFT JOIN operates_on o ON d.phone = o.d_phone
+LEFT JOIN hospital h ON o.h_id = h.id
+WHERE d.phone={phone}
+GROUP BY "Doctor phone nb", "Doctor name", "Hospital name"
+ORDER BY "Nb of operations" DESC;""")
+        hospitals=[operation[2] for operation in operations]
+        numberofoperations=[operation[3] for operation in operations]
+        context['hospitals']=hospitals
+        context['numberofoperations']=numberofoperations
+
+        return JsonResponse(context)
+
 
 def viewhos(request):
-    pass
+    if request.method == 'GET':
+        context=dict()
+        hospitals=sendQuery("SELECT id, name FROM hospital;")
+        context['hospitals']=[hospital[1]+', '+str(hospital[0]) for hospital in hospitals]
+        return render(request, 'main/viewhos.html', context)
+    
+    if request.method == 'POST':
+        context=dict()
+        body=request.body.decode('utf-8')
+        body=loads(body)
+        hospital=body['hos']
+        try:
+            hospitalid=int(hospital.split(', ')[1])
+        except:
+            hospitalid=-1
+        # print(hospitalid)
+        info=sendQuery(f"SELECT id, phone, name, representative, location FROM hospital WHERE id={hospitalid};")
+        id=info[0][0]
+        phone=info[0][1]
+        name=info[0][2]
+        representative=info[0][3]
+        location=info[0][4]
+        context['id']=id
+        context['phone']=phone
+        context['name']=name
+        context['representative']=representative
+        context['location']=location
+
+        coverage=sendQuery(f"""SELECT h.id AS "Hospital ID", h.name AS "Hospital name",
+COUNT(DISTINCT i.name) AS "Number of plans"
+FROM hospital h
+JOIN covers c ON h.id = c.h_id
+JOIN insurance_plan i ON c.plan_identifier = i.id
+WHERE h.id={id}
+GROUP BY h.id, h.name
+ORDER BY "Number of plans" DESC, "Hospital name";""")[0][2]
+        context['coverage']=coverage
+
+        return JsonResponse(context)
+        
 
 def viewlab(request):
     if request.method == 'GET':
@@ -670,4 +804,34 @@ def viewlab(request):
         return JsonResponse(context)
 
 def viewins(request):
+    if request.method == 'GET':
+        context=dict()
+        plans=sendQuery("SELECT DISTINCT name FROM insurance_plan;")
+        context['plans']=[plan[0] for plan in plans]
+        return render(request, 'main/viewins.html', context)
+
+    if request.method == 'POST':
+        context=dict()
+        body=request.body.decode('utf-8')
+        body=loads(body)
+        plan=body['ins']
+        # print(plan)
+        info=sendQuery(f"SELECT id, type, name, description, price, start_age, end_age, percentage_paid, time_limit, financial_limit FROM insurance_plan WHERE name='{plan}';")
+        context['name']=info[0][2]
+        context['type']=info[0][1]
+        context['description']=info[0][3]
+        plans=[[entry[0], entry[4], entry[5], entry[6], entry[7], entry[8], entry[9]] for entry in info]
+        context['plans']=plans
+        return JsonResponse(context)
+
+def inscus(request):
+    pass
+
+def recpay(request):
+    pass
+
+def recope(request):
+    pass
+
+def reclab(request):
     pass

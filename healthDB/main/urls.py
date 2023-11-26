@@ -19,4 +19,8 @@ urlpatterns = [
     path('viewhos/', views.viewhos, name='viewhos'),
     path('viewlab/', views.viewlab, name='viewlab'),
     path('viewins/', views.viewins, name='viewins'),
+    path('inscus/', views.inscus, name='inscus'),
+    path('recpay/', views.recpay, name='recpay'),
+    path('recope/', views.recope, name='recope'),
+    path('reclab/', views.reclab, name='reclab'),
 ]

@@ -4,12 +4,12 @@ INNER JOIN bill_view b ON p.b_id = b.id
 WHERE ((b.still_due > 0) AND (b.date+days_to_pay < CURRENT_DATE));
 
 
-SELECT h.id AS "Hospital ID", h.name AS "Hospital name", 
-COUNT(DISTINCT i.id) AS "Number of plans" 
-FROM hospital h, covers c, insurance_plan i
-WHERE h.ID = c.h_id
-AND c.plan_identifier=i.identifier2
-GROUP BY h.id
+SELECT h.id AS "Hospital ID", h.name AS "Hospital name",
+COUNT(DISTINCT i.name) AS "Number of plans"
+FROM hospital h
+JOIN covers c ON h.id = c.h_id
+JOIN insurance_plan i ON c.plan_identifier = i.id
+GROUP BY h.id, h.name
 ORDER BY "Number of plans" DESC, "Hospital name";
 
 
