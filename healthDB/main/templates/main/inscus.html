@@ -1,0 +1,59 @@
+{% extends "main/default.html" %}
+
+{% block title %}Insure a customer{% endblock %}
+
+{% block css %}
+<style>
+    .input-group {
+        max-width: 400px;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<h2>Insure a customer and their family members</h2>
+
+<form method="POST" action="/healthdb/inscus/">
+    {% csrf_token %}
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Customer</span>
+        <select name="cus" required class="form-select" id="cuschoice">
+            <option value="">Choose a customer</option>
+            {% for customer in customers %}
+                <option value="{{customer}}">{{customer}}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Plan type</span>
+        <select name="pla" required class="form-select" id="plachoice">
+            <option value="">Choose a plan type</option>
+            <option value="in+out">In and out</option>
+            <option value="in">Out only</option>
+        </select>
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Amount paid</span>
+        <input required name="amount" type="number" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <button type="submit" class="btn btn-primary" onclick="getinfo()">Submit</button>
+
+</form>
+<br>
+<div id="info">
+
+</div>
+
+{% endblock %}
+
+
+{% block js %}
+<script>
+
+</script>
+{% endblock %}

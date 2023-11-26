@@ -940,18 +940,21 @@ BEGIN
 -- check if customer exists
 IF (SELECT COUNT(*) FROM customer_table WHERE ssn = customer_ssn) = 0 THEN
 RAISE NOTICE 'Customer with ssn % does not exist.', customer_ssn;
+RAISE NOTICE 'Error';
 RETURN;
 END IF;
 
 --check type
 IF plan_type NOT IN ('in+out', 'in') THEN
 RAISE NOTICE 'Plan type must be either in+out or in.';
+RAISE NOTICE 'Error';
 RETURN;
 END IF;
 
 -- check if amount is greater than 0
 IF amount <= 0 THEN
 RAISE NOTICE 'Amount must be greater than 0.';
+RAISE NOTICE 'Error';
 RETURN;
 END IF;
 
@@ -965,9 +968,6 @@ SELECT COUNT(*)+1 INTO total_plans
 FROM family_member_table
 WHERE c_ssn = customer_ssn;
 
---insert in the table
-INSERT INTO insures (plan_identifier, c_ssn, nb_of_plans)
-VALUES (plan_iden2, customer_ssn, total_plans);
 
 --now need to get the price for the family members
 SELECT COALESCE(SUM(price),0) INTO sum2
@@ -977,6 +977,19 @@ AND f.c_ssn = customer_ssn AND p.type=plan_type;
 
 -- now put in total amount the addition of sum1 and sum2
 total_amount := sum1 + sum2;
+
+-- check if amount is greater than total amount
+IF amount > total_amount THEN
+RAISE NOTICE 'Amount is greater than total amount, please pay the exact amount or less.';
+RAISE NOTICE 'Error';
+RETURN;
+END IF;
+
+
+--insert in the table
+INSERT INTO insures (plan_identifier, c_ssn, nb_of_plans)
+VALUES (plan_iden2, customer_ssn, total_plans);
+
 
 -- now insert into bill and set id to be the next value in sequence
 SELECT MAX(id)+1 INTO next_id FROM bill;
@@ -992,6 +1005,7 @@ INSERT INTO pays (c_ssn, b_id, date, amount_paid)
 VALUES (customer_ssn, next_id, CURRENT_DATE, amount);
 
 RAISE NOTICE 'Customer with ssn % insured successfully, bill id is %', customer_ssn, next_id;
+RAISE NOTICE 'Success';
 END;$$;
 
 
@@ -1003,6 +1017,7 @@ BEGIN
 -- check if this bill belongs to this customer
 IF (SELECT COUNT(*) FROM pays WHERE c_ssn = customer_ssn AND b_id = bill_id) = 0 THEN
 RAISE NOTICE 'Bill with id % does not belong to customer with ssn %.', bill_id, customer_ssn;
+RAISE NOTICE 'Error';
 RETURN;
 END IF;
 
@@ -1012,12 +1027,14 @@ FROM bill_view WHERE id=bill_id;
 
 IF amount_left = 0 THEN
 RAISE NOTICE 'Customer with ssn % has already paid this bill.', customer_ssn;
+RAISE NOTICE 'Error';
 RETURN;
 END IF;
 
 -- check if amount is greater than amount left
 IF amount > amount_left THEN
 RAISE NOTICE 'Amount paid is greater than amount left to pay, please pay the exact amount or less.';
+RAISE NOTICE 'Error';
 RETURN;
 END IF;
 
@@ -1026,5 +1043,62 @@ INSERT INTO pays (c_ssn, b_id, date, amount_paid)
 VALUES (customer_ssn, bill_id, CURRENT_DATE, amount);
 
 RAISE NOTICE 'Customer with ssn % paid successfully. Amount left to pay is %.', customer_ssn, amount_left-amount;
+RAISE NOTICE 'Success';
 END;$$;
 
+
+CREATE OR REPLACE FUNCTION operate_on_customer(customer_ssn bigint, doctor_phone bigint, hospital_id int, date date, description text, price numeric)
+RETURNS void LANGUAGE plpgsql AS $$
+BEGIN
+-- check if customer exists
+IF (SELECT COUNT(*) FROM customer_table WHERE ssn = customer_ssn) = 0 THEN
+RAISE NOTICE 'Customer with ssn % does not exist.', customer_ssn;
+RAISE NOTICE 'Error';
+RETURN;
+END IF;
+
+-- check if doctor exists
+IF (SELECT COUNT(*) FROM doctor_table WHERE phone = doctor_phone) = 0 THEN
+RAISE NOTICE 'Doctor with phone % does not exist.', doctor_phone;
+RAISE NOTICE 'Error';
+RETURN;
+END IF;
+
+-- check if hospital exists
+IF (SELECT COUNT(*) FROM hospital WHERE id = hospital_id) = 0 THEN
+RAISE NOTICE 'Hospital with id % does not exist.', hospital_id;
+RAISE NOTICE 'Error';
+RETURN;
+END IF;
+
+INSERT INTO operates_on (d_phone, h_id, c_ssn, date, description, price)
+VALUES (doctor_phone, hospital_id, customer_ssn, date, description, price);
+
+RAISE NOTICE 'Customer with ssn % operated on successfully.', customer_ssn;
+RAISE NOTICE 'Success';
+END;$$;
+
+
+CREATE OR REPLACE FUNCTION perform_test(customer_ssn bigint, lab_id int, description text, price numeric, date date)
+RETURNS void LANGUAGE plpgsql AS $$
+BEGIN
+-- check if customer exists
+IF (SELECT COUNT(*) FROM customer_table WHERE ssn = customer_ssn) = 0 THEN
+RAISE NOTICE 'Customer with ssn % does not exist.', customer_ssn;
+RAISE NOTICE 'Error';
+RETURN;
+END IF;
+
+-- check if lab exists
+IF (SELECT COUNT(*) FROM lab WHERE id = lab_id) = 0 THEN
+RAISE NOTICE 'Lab with id % does not exist.', lab_id;
+RAISE NOTICE 'Error';
+RETURN;
+END IF;
+
+INSERT INTO tests (c_ssn, lab_id, description, price, date)
+VALUES (customer_ssn, lab_id, description, price, date);
+
+RAISE NOTICE 'Customer with ssn % tested successfully.', customer_ssn;
+RAISE NOTICE 'Success';
+END;$$;

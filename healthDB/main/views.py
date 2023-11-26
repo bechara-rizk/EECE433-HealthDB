@@ -825,13 +825,225 @@ def viewins(request):
         return JsonResponse(context)
 
 def inscus(request):
-    pass
+    context=dict()
+    customers=sendQuery("SELECT ssn, first_name, last_name FROM customer_table;")
+    context['customers']=[customer[1]+' '+customer[2]+', '+str(customer[0]) for customer in customers]
+    if request.method == 'GET':
+        return render(request, 'main/inscus.html', context)
+
+    if request.method=='POST':
+        customer=request.POST.get('cus')
+        plantype=request.POST.get('pla')
+        amount=request.POST.get('amount')
+
+        # check that customer ssn is valid
+        try:
+            customerssn=int(customer.split(', ')[1])
+            if customerssn not in [customer[0] for customer in sendQuery("SELECT ssn FROM customer_table;")]:
+                raise Exception()
+        except:
+            context['error']='Customer SSN is invalid'
+            return render(request, 'main/inscus.html', context)
+        
+        # check that plan type is valid
+        if plantype not in ['in', 'in+out']:
+            context['error']='Plan type is invalid'
+            return render(request, 'main/inscus.html', context)
+        
+        # check that amount is a number and not negative
+        try:
+            amount=int(amount)
+            if amount<0:
+                raise Exception()
+        except:
+            context['error']='Amount must be a positive number'
+            return render(request, 'main/inscus.html', context)
+        
+        out=callFunction("insure_customer", customerssn, plantype, amount)
+        if out[1]:
+            context['error']=out[1]
+            return render(request, 'main/inscus.html', context)
+        context['success']='Customer insured successfully'
+        return render(request, 'main/inscus.html', context)
+
 
 def recpay(request):
-    pass
+    context=dict()
+    customers=sendQuery("SELECT ssn, first_name, last_name FROM customer_table;")
+    context['customers']=[customer[1]+' '+customer[2]+', '+str(customer[0]) for customer in customers]
+    bills=sendQuery("SELECT id from bill_view WHERE still_due>0;")
+    context['bills']=[bill[0] for bill in bills]
+    if request.method == 'GET':
+        return render(request, 'main/recpay.html', context)
+    
+    if request.method == 'POST':
+        customer=request.POST.get('cus')
+        bill=request.POST.get('bill')
+        amount=request.POST.get('amount')
+
+        # check that customer ssn is valid
+        try:
+            customerssn=int(customer.split(', ')[1])
+            if customerssn not in [customer[0] for customer in sendQuery("SELECT ssn FROM customer_table;")]:
+                raise Exception()
+        except:
+            context['error']='Customer SSN is invalid'
+            return render(request, 'main/recpay.html', context)
+        
+        # check that bill id is valid
+        try:
+            billid=int(bill)
+            if billid not in [bill[0] for bill in sendQuery("SELECT id from bill_view WHERE still_due>0;")]:
+                raise Exception()
+        except:
+            context['error']='Bill ID is invalid'
+            return render(request, 'main/recpay.html', context)
+        
+        # check that amount is a number and not negative
+        try:
+            amount=int(amount)
+            if amount<0:
+                raise Exception()
+        except:
+            context['error']='Amount must be a positive number'
+            return render(request, 'main/recpay.html', context)
+        
+        out=callFunction("pay_amount", customerssn, billid, amount)
+        if out[1]:
+            context['error']=out[1]
+            return render(request, 'main/recpay.html', context)
+        context['success']='Payment received successfully'
+        return render(request, 'main/recpay.html', context)
 
 def recope(request):
-    pass
+    context=dict()
+    customers=sendQuery("SELECT ssn, first_name, last_name FROM customer_table;")
+    context['customers']=[customer[1]+' '+customer[2]+', '+str(customer[0]) for customer in customers]
+    doctors=sendQuery("SELECT phone, first_name, last_name FROM doctor_table;")
+    context['doctors']=[doctor[1]+' '+doctor[2]+', '+str(doctor[0]) for doctor in doctors]
+    hospitals=sendQuery("SELECT id, name FROM hospital;")
+    context['hospitals']=[hospital[1]+', '+str(hospital[0]) for hospital in hospitals]
+
+    if request.method == 'GET':
+        return render(request, 'main/recope.html', context)
+    
+    if request.method == 'POST':
+        customer=request.POST.get('cus')
+        doctor=request.POST.get('doctor')
+        hospital=request.POST.get('hospital')
+        date=request.POST.get('date')
+        description=request.POST.get('desc')
+        price=request.POST.get('price')
+
+        if not description:
+            context['error']='Description must be filled'
+
+        # check that customer ssn is valid
+        try:
+            customerssn=int(customer.split(', ')[1])
+            if customerssn not in [customer[0] for customer in sendQuery("SELECT ssn FROM customer_table;")]:
+                raise Exception()
+        except:
+            context['error']='Customer SSN is invalid'
+            return render(request, 'main/recope.html', context)
+        
+        # check that doctor phone is valid
+        try:
+            doctorphone=int(doctor.split(', ')[1])
+            if doctorphone not in [doctor[0] for doctor in sendQuery("SELECT phone FROM doctor_table;")]:
+                raise Exception()
+        except:
+            context['error']='Doctor phone is invalid'
+            return render(request, 'main/recope.html', context)
+        
+        # check that hospital id is valid
+        try:
+            hospitalid=int(hospital.split(', ')[1])
+            if hospitalid not in [hospital[0] for hospital in sendQuery("SELECT id FROM hospital;")]:
+                raise Exception()
+        except:
+            context['error']='Hospital ID is invalid'
+            return render(request, 'main/recope.html', context)
+        
+        # regex to check format of date (YYYY-MM-DD)
+        date_regex=re.compile(r'^\d{4}-\d{2}-\d{2}$')
+        if not date_regex.match(date):
+            context['error']='Date must be in the format YYYY-MM-DD'
+            return render(request, 'main/recope.html', context)
+        
+        # check that price is a number and not negative
+        try:
+            price=int(price)
+            if price<0:
+                raise Exception()
+        except:
+            context['error']='Price must be a positive number'
+            return render(request, 'main/recope.html', context)
+        
+        out=callFunction("operate_on_customer", customerssn, doctorphone, hospitalid, date, description, price)
+        if out[1]:
+            context['error']=out[1]
+            return render(request, 'main/recope.html', context)
+        context['success']='Operation recorded successfully'
+        return render(request, 'main/recope.html', context)
 
 def reclab(request):
-    pass
+    context=dict()
+    customers=sendQuery("SELECT ssn, first_name, last_name FROM customer_table;")
+    context['customers']=[customer[1]+' '+customer[2]+', '+str(customer[0]) for customer in customers]
+    labs=sendQuery("SELECT id, name FROM lab;")
+    context['labs']=[lab[1]+', '+str(lab[0]) for lab in labs]
+
+    if request.method == 'GET':
+        return render(request, 'main/reclab.html', context)
+    
+    if request.method == 'POST':
+        customer=request.POST.get('cus')
+        lab=request.POST.get('lab')
+        date=request.POST.get('date')
+        description=request.POST.get('desc')
+        price=request.POST.get('price')
+
+        if not description:
+            context['error']='Description must be filled'
+
+        # check that customer ssn is valid
+        try:
+            customerssn=int(customer.split(', ')[1])
+            if customerssn not in [customer[0] for customer in sendQuery("SELECT ssn FROM customer_table;")]:
+                raise Exception()
+        except:
+            context['error']='Customer SSN is invalid'
+            return render(request, 'main/reclab.html', context)
+        
+        # check that lab id is valid
+        try:
+            labid=int(lab.split(', ')[1])
+            if labid not in [lab[0] for lab in sendQuery("SELECT id FROM lab;")]:
+                raise Exception()
+        except:
+            context['error']='Lab ID is invalid'
+            return render(request, 'main/reclab.html', context)
+        
+        # regex to check format of date (YYYY-MM-DD)
+        date_regex=re.compile(r'^\d{4}-\d{2}-\d{2}$')
+        if not date_regex.match(date):
+            context['error']='Date must be in the format YYYY-MM-DD'
+            return render(request, 'main/reclab.html', context)
+        
+        # check that price is a number and not negative
+        try:
+            price=int(price)
+            if price<0:
+                raise Exception()
+        except:
+            context['error']='Price must be a positive number'
+            return render(request, 'main/reclab.html', context)
+        
+        out=callFunction("perform_test", customerssn, labid, description, price, date)
+        if out[1]:
+            context['error']=out[1]
+            return render(request, 'main/reclab.html', context)
+        context['success']='Test recorded successfully'
+        return render(request, 'main/reclab.html', context)
+    

@@ -1,0 +1,60 @@
+{% extends "main/default.html" %}
+
+{% block title %}Receive payment{% endblock %}
+
+{% block css %}
+<style>
+    .input-group {
+        max-width: 400px;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<h2>Receive payment from a customer</h2>
+
+<form method="POST" action="/healthdb/recpay/">
+    {% csrf_token %}
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Customer</span>
+        <select name="cus" required class="form-select" id="cuschoice">
+            <option value="">Choose a customer</option>
+            {% for customer in customers %}
+                <option value="{{customer}}">{{customer}}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Bill</span>
+        <select name="bill" required class="form-select" id="billchoice">
+            <option value="">Choose a bill</option>
+            {% for bill in bills %}
+                <option value="{{bill}}">{{bill}}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Amount paid</span>
+        <input required name="amount" type="number" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <button type="submit" class="btn btn-primary" onclick="getinfo()">Submit</button>
+
+</form>
+<br>
+<div id="info">
+
+</div>
+
+{% endblock %}
+
+
+{% block js %}
+<script>
+
+</script>
+{% endblock %}

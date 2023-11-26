@@ -1,0 +1,70 @@
+{% extends "main/default.html" %}
+
+{% block title %}Record lab test{% endblock %}
+
+{% block css %}
+<style>
+    .input-group {
+        max-width: 400px;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<h2>Record a patient test</h2>
+
+<form method="POST" action="/healthdb/reclab/">
+    {% csrf_token %}
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Customer</span>
+        <select name="cus" required class="form-select" id="cuschoice">
+            <option value="">Choose a customer</option>
+            {% for customer in customers %}
+                <option value="{{customer}}">{{customer}}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Lab</span>
+        <select name="lab" required class="form-select" >
+            <option value="">Choose a lab</option>
+            {% for lab in labs %}
+                <option value="{{lab}}">{{lab}}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Description</span>
+        <input required name="desc" type="text" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Price</span>
+        <input required name="price" type="number" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Date</span>
+        <input required name="date" type="date" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <button type="submit" class="btn btn-primary" onclick="getinfo()">Submit</button>
+
+</form>
+<br>
+<div id="info">
+
+</div>
+
+{% endblock %}
+
+
+{% block js %}
+<script>
+
+</script>
+{% endblock %}
