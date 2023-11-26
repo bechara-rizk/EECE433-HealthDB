@@ -1,0 +1,97 @@
+{% extends "main/default.html" %}
+
+{% block title %}Insert new employee{% endblock %}
+
+{% block css %}
+<style>
+    .input-group {
+        max-width: 400px;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<h2>Insert a new employee</h2>
+
+<form action="/healthdb/newemployee/" method="POST">
+    {% csrf_token %}
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">SSN</span>
+        <input required name="ssn" type="number" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">First name</span>
+        <input required name="first_name" type="text" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Last name</span>
+        <input required name="last_name" type="text" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Phone</span>
+        <input required name="phone" type="number" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Extension</span>
+        <input name="ext" type="number" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Date hired</span>
+        <input required name="date_hired" type="date" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Address</span>
+        <input required name="address" type="text" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Salary</span>
+        <input required name="salary" type="number" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">D.O.B</span>
+        <input required name="dob" type="date" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Supervisor SSN</span>
+        <select name="su_ssn" class="form-select">
+            <option selected value="Null">None</option>
+            {% for ssn in ssns %}
+                <option value="{{ssn}}">{{ssn}}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Department</span>
+        <select name="dep" required class="form-select">
+            <option value="">Choose a department</option>
+            {% for dep in departments %}
+                <option value="{{dep}}">{{dep}}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+
+
+</form>
+
+{% endblock %}
+
+
+{% block js %}
+<script>
+    
+</script>
+{% endblock %}

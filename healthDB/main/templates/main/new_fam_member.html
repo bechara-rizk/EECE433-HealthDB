@@ -1,0 +1,62 @@
+{% extends "main/default.html" %}
+
+{% block title %}Insert new family member{% endblock %}
+
+{% block css %}
+<style>
+    .input-group {
+        max-width: 400px;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<h2>Insert a new family member</h2>
+
+<form action="/healthdb/newfamilymember/" method="POST">
+    {% csrf_token %}
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Customer SSN</span>
+        <select name="cssn" required class="form-select">
+            <option value="">Choose a customer</option>
+            {% for ssn in ssns %}
+                <option value="{{ssn}}">{{ssn}}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">First name</span>
+        <input required name="first_name" type="text" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Last name</span>
+        <input required name="last_name" type="text" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">D.O.B</span>
+        <input required name="dob" type="date" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Relation</span>
+        <input required name="relation" type="text" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+
+
+</form>
+
+{% endblock %}
+
+
+{% block js %}
+<script>
+    
+</script>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "main/default.html" %}
+
+{% block title %}Insert new doctor{% endblock %}
+
+{% block css %}
+<style>
+    .input-group {
+        max-width: 400px;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<h2>Insert a new doctor</h2>
+
+<form action="/healthdb/newdoctor/" method="POST">
+    {% csrf_token %}
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Phone</span>
+        <input required name="phone" type="number" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">First name</span>
+        <input required name="first_name" type="text" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Last name</span>
+        <input required name="last_name" type="text" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Specialization</span>
+        <input required name="spec" type="text" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Started working</span>
+        <input required name="workstart" type="date" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Number of malpractices</span>
+        <input required name="malp" type="number" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Hospital</span>
+        <select name="hospital" required class="form-select">
+            <option value="">Choose a hospital</option>
+            {% for hospital in hospitals %}
+                <option value="{{hospital.0}}">{{hospital.1}}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+
+
+</form>
+
+{% endblock %}
+
+
+{% block js %}
+<script>
+    
+</script>
+{% endblock %}

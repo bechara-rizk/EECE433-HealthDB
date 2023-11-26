@@ -1,0 +1,57 @@
+{% extends "main/default.html" %}
+
+{% block title %}Insert new broker{% endblock %}
+
+{% block css %}
+<style>
+    .input-group {
+        max-width: 400px;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<h2>Insert a new broker</h2>
+
+<form action="/healthdb/newbroker/" method="POST">
+    {% csrf_token %}
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Phone</span>
+        <input required name="phone" type="number" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Name</span>
+        <input required name="name" type="text" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Start date</span>
+        <input required name="start_date" type="date" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Address</span>
+        <input required name="address" type="text" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Commission</span>
+        <input required name="commission" type="number" class="form-control" aria-describedby="inputGroup-sizing-default">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+
+
+</form>
+
+{% endblock %}
+
+
+{% block js %}
+<script>
+    
+</script>
+{% endblock %}

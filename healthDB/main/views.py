@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from .dbrequests import sendQuery, callFunction, callProcedure
+import re
 
 # Create your views here.
 def index(request):
@@ -152,3 +153,352 @@ def alltables(request):
     context['operates_onTitles']=['Doctor Phone', 'Hospital ID', 'Customer SSN', 'Date', 'Description', 'Price']
     
     return render(request, 'main/all_tables.html', context)
+
+def newemployee(request):
+    ssns=sendQuery("SELECT ssn FROM employee_table;")
+    ssns=[ssn[0] for ssn in ssns]
+    departments=sendQuery("SELECT name FROM department;")
+    departments=[department[0] for department in departments]
+
+    context=dict()
+    context['ssns']=ssns
+    context['departments']=departments
+
+    if request.method == 'GET':
+
+        return render(request, 'main/new_employee.html', context)
+
+    if request.method == 'POST':
+        ssn=request.POST.get('ssn')
+        first_name=request.POST.get('first_name')
+        last_name=request.POST.get('last_name')
+        phone=request.POST.get('phone')
+        extension=request.POST.get('ext')
+        date_hired=request.POST.get('date_hired')
+        address=request.POST.get('address')
+        salary=request.POST.get('salary')
+        dob=request.POST.get('dob')
+        su_ssn=request.POST.get('su_ssn')
+        d_name=request.POST.get('dep')
+
+        # check that all values are filled
+        if not ssn or not first_name or not last_name or not phone or not date_hired or not address or not salary or not dob or not su_ssn or not d_name:
+            context['error']='All fields must be filled'
+            return render(request, 'main/new_employee.html', context)
+        
+        # check that ssn is unique and a number and not negative
+        try:
+            ssn=int(ssn)
+            if ssn<0 or ssn in ssns:
+                raise Exception()
+        except:
+            context['error']='SSN must be a unique positive number'
+            return render(request, 'main/new_employee.html', context)
+        
+        # check that su_ssn is valid and a number or null
+        try:
+            if su_ssn=='Null':
+                pass
+            else:
+                su_ssn=int(su_ssn)
+                if su_ssn not in ssns:
+                    raise Exception()
+        except:
+            context['error']='Supervisor SSN must be a valid number or null'
+            return render(request, 'main/new_employee.html', context)
+        
+        # check that d_name is valid
+        if d_name not in departments:
+            context['error']='Department does not exist'
+            return render(request, 'main/new_employee.html', context)
+        
+        # check that salary is a number and not negative
+        try:
+            salary=int(salary)
+            if salary<0:
+                raise Exception()
+        except:
+            context['error']='Salary must be a positive number'
+            return render(request, 'main/new_employee.html', context)
+        
+        # check that extension is a number and not negative or null
+        try:
+            if not extension:
+                extension='Null'
+            else:
+                extension=int(extension)
+                if extension<0:
+                    raise Exception()
+        except:
+            context['error']='Extension must be a positive number or null'
+            return render(request, 'main/new_employee.html', context)
+        
+        # check that phone is a number and not negative
+        try:
+            phone=int(phone)
+            if phone<0:
+                raise Exception()
+        except:
+            context['error']='Phone must be a positive number'
+            return render(request, 'main/new_employee.html', context)
+        
+        # regex to check format of date (YYYY-MM-DD)
+        date_regex=re.compile(r'^\d{4}-\d{2}-\d{2}$')
+        if not date_regex.match(date_hired):
+            context['error']='Date hired must be in the format YYYY-MM-DD'
+            return render(request, 'main/new_employee.html', context)
+        
+        if not date_regex.match(dob):
+            context['error']='Date of birth must be in the format YYYY-MM-DD'
+            return render(request, 'main/new_employee.html', context)
+        
+        # insert into database
+        sendQuery(f"INSERT INTO employee_table (ssn, first_name, last_name, phone, extension, date_hired, address, salary, dob, su_ssn, d_name) VALUES ({ssn}, '{first_name}', '{last_name}', {phone}, {extension}, '{date_hired}', '{address}', {salary}, '{dob}', {su_ssn}, '{d_name}');")
+        context['success']='Employee added successfully'
+        return render(request, 'main/new_employee.html', context)
+
+def newbroker(request):
+    phones=sendQuery("SELECT phone FROM broker_table;")
+    phones=[phone[0] for phone in phones]
+
+    context=dict()
+
+    if request.method == 'GET':
+
+        return render(request, 'main/new_broker.html', context)
+
+    if request.method == 'POST':
+        phone=request.POST.get('phone')
+        start_date=request.POST.get('start_date')
+        address=request.POST.get('address')
+        commission=request.POST.get('commission')
+        name=request.POST.get('name')
+
+        # check that all values are filled
+        if not phone or not start_date or not address or not commission or not name:
+            context['error']='All fields must be filled'
+            return render(request, 'main/new_broker.html', context)
+        
+        # check that phone is unique and a number and not negative
+        try:
+            phone=int(phone)
+            if phone<0 or phone in phones:
+                raise Exception()
+        except:
+            context['error']='Phone must be a unique positive number'
+            return render(request, 'main/new_broker.html', context)
+        
+        # check that commission is a number and not negative
+        try:
+            commission=int(commission)
+            if commission<=0 or commission>=20:
+                raise Exception()
+        except:
+            context['error']='Commission must be a positive number between 0 and 20 (exclusive)'
+            return render(request, 'main/new_broker.html', context)
+        
+        # regex to check format of date (YYYY-MM-DD)
+        date_regex=re.compile(r'^\d{4}-\d{2}-\d{2}$')
+        if not date_regex.match(start_date):
+            context['error']='Start date must be in the format YYYY-MM-DD'
+            return render(request, 'main/new_broker.html', context)
+        
+        # insert into database
+        sendQuery(f"INSERT INTO broker_table (phone, start_date, address, commission, name) VALUES ({phone}, '{start_date}', '{address}', {commission}, '{name}');")
+        context['success']='Broker added successfully'
+        return render(request, 'main/new_broker.html', context)
+    
+def newcustomer(request):
+    ssns=sendQuery("SELECT ssn FROM customer_table;")
+    ssns=[ssn[0] for ssn in ssns]
+    brokers=sendQuery("SELECT phone FROM broker_table;")
+    brokers=[broker[0] for broker in brokers]
+    employees=sendQuery("SELECT ssn FROM employee_table WHERE d_name='Customer Service';")
+    employees=[employee[0] for employee in employees]
+
+    context=dict()
+    context['brokers']=brokers
+    context['employees']=employees
+
+    if request.method == 'GET':
+
+        return render(request, 'main/new_customer.html', context)
+
+    if request.method == 'POST':
+        ssn=request.POST.get('ssn')
+        first_name=request.POST.get('first_name')
+        last_name=request.POST.get('last_name')
+        phone=request.POST.get('phone')
+        dob=request.POST.get('dob')
+        address=request.POST.get('address')
+        b_phone=request.POST.get('broker')
+        e_ssn=request.POST.get('essn')
+        date_of_assignment=request.POST.get('assignment')
+
+        # check that all values are filled
+        if not ssn or not first_name or not last_name or not phone or not dob or not address or not e_ssn or not date_of_assignment:
+            context['error']='All fields must be filled'
+            return render(request, 'main/new_customer.html', context)
+        
+        # check that ssn is unique and a number and not negative
+        try:
+            ssn=int(ssn)
+            if ssn<0 or ssn in ssns:
+                raise Exception()
+        except:
+            context['error']='SSN must be a unique positive number'
+            return render(request, 'main/new_customer.html', context)
+        
+        # check that b_phone is valid and a number
+        try:
+            if b_phone=='Null':
+                pass
+            else:
+                b_phone=int(b_phone)
+                if b_phone<0:
+                    raise Exception()
+        except:
+            context['error']='Broker phone must be a valid broker\'s phone number'
+            return render(request, 'main/new_customer.html', context)
+        
+        # check that e_ssn is valid and a number
+        try:
+            e_ssn=int(e_ssn)
+            if e_ssn not in employees:
+                raise Exception()
+        except:
+            context['error']='Employee SSN must be a valid number'
+            return render(request, 'main/new_customer.html', context)
+        
+        # check that phone is a number and not negative
+        try:
+            phone=int(phone)
+            if phone<0:
+                raise Exception()
+        except:
+            context['error']='Phone must be a positive number'
+            return render(request, 'main/new_customer.html', context)
+        
+        # regex to check format of date (YYYY-MM-DD)
+        date_regex=re.compile(r'^\d{4}-\d{2}-\d{2}$')
+        if not date_regex.match(dob):
+            context['error']='Date of birth must be in the format YYYY-MM-DD'
+            return render(request, 'main/new_customer.html', context)
+        
+        if not date_regex.match(date_of_assignment):
+            context['error']='Date of assignment must be in the format YYYY-MM-DD'
+            return render(request, 'main/new_customer.html', context)
+        
+        # insert into database
+        sendQuery(f"INSERT INTO customer_table (ssn, first_name, last_name, phone, dob, address, b_phone, e_ssn, date_of_assignment) VALUES ({ssn}, '{first_name}', '{last_name}', {phone}, '{dob}', '{address}', {b_phone}, {e_ssn}, '{date_of_assignment}');")
+        context['success']='Customer added successfully'
+        return render(request, 'main/new_customer.html', context)
+    
+def newfamilymember(request):
+    ssns=sendQuery("SELECT ssn FROM customer_table;")
+    ssns=[ssn[0] for ssn in ssns]
+
+    context=dict()
+
+    if request.method == 'GET':
+        context['ssns']=ssns
+        return render(request, 'main/new_fam_member.html', context)
+
+    if request.method == 'POST':
+        c_ssn=request.POST.get('cssn')
+        first_name=request.POST.get('first_name')
+        last_name=request.POST.get('last_name')
+        dob=request.POST.get('dob')
+        relation=request.POST.get('relation')
+
+        # check that all values are filled
+        if not c_ssn or not first_name or not last_name or not dob or not relation:
+            context['error']='All fields must be filled'
+            return render(request, 'main/new_fam_member.html', context)
+        
+        # check that c_ssn is valid and a number
+        try:
+            c_ssn=int(c_ssn)
+            if c_ssn not in ssns:
+                raise Exception()
+        except:
+            context['error']='Customer SSN must be a valid number'
+            return render(request, 'main/new_fam_member.html', context)
+        
+        # regex to check format of date (YYYY-MM-DD)
+        date_regex=re.compile(r'^\d{4}-\d{2}-\d{2}$')
+        if not date_regex.match(dob):
+            context['error']='Date of birth must be in the format YYYY-MM-DD'
+            return render(request, 'main/new_fam_member.html', context)
+        
+        # insert into database
+        sendQuery(f"INSERT INTO family_member_table (c_ssn, first_name, last_name, dob, relation) VALUES ({c_ssn}, '{first_name}', '{last_name}', '{dob}', '{relation}');")
+        context['success']='Family member added successfully'
+        return render(request, 'main/new_fam_member.html', context)
+    
+def newdoctor(request):
+    phones=sendQuery("SELECT phone FROM doctor_table;")
+    phones=[phone[0] for phone in phones]
+    hospitals=sendQuery("SELECT id,name FROM hospital;")
+    hospitalids=[hospital[0] for hospital in hospitals]
+
+    context=dict()
+    context['hospitals']=hospitals
+
+    if request.method == 'GET':
+
+        return render(request, 'main/new_doctor.html', context)
+
+    if request.method == 'POST':
+        phone=request.POST.get('phone')
+        specialization=request.POST.get('spec')
+        first_name=request.POST.get('first_name')
+        last_name=request.POST.get('last_name')
+        work_start=request.POST.get('workstart')
+        nb_of_malpractices=request.POST.get('malp')
+        h_id=request.POST.get('hospital')
+
+        # check that all values are filled
+        if not phone or not specialization or not first_name or not last_name or not work_start or not nb_of_malpractices or not h_id:
+            context['error']='All fields must be filled'
+            return render(request, 'main/new_doctor.html', context)
+        
+        # check that phone is unique and a number and not negative
+        try:
+            phone=int(phone)
+            if phone<0 or phone in phones:
+                raise Exception()
+        except:
+            context['error']='Phone must be a unique positive number'
+            return render(request, 'main/new_doctor.html', context)
+        
+        # check that nb_of_malpractices is a number and not negative
+        try:
+            nb_of_malpractices=int(nb_of_malpractices)
+            if nb_of_malpractices<0:
+                raise Exception()
+        except:
+            context['error']='Number of malpractices must be a positive number'
+            return render(request, 'main/new_doctor.html', context)
+        
+        # regex to check format of date (YYYY-MM-DD)
+        date_regex=re.compile(r'^\d{4}-\d{2}-\d{2}$')
+        if not date_regex.match(work_start):
+            context['error']='Work start must be in the format YYYY-MM-DD'
+            return render(request, 'main/new_doctor.html', context)
+        
+        # check that h_id is valid and a number
+        try:
+            h_id=int(h_id)
+            if h_id not in hospitalids:
+                raise Exception()
+        except:
+            context['error']='Hospital ID must be a valid number'
+            return render(request, 'main/new_doctor.html', context)
+        
+        # insert into database
+        sendQuery(f"INSERT INTO doctor_table (phone, specialization, first_name, last_name, work_start, nb_of_malpractices) VALUES ({phone}, '{specialization}', '{first_name}', '{last_name}', '{work_start}', {nb_of_malpractices});")
+        sendQuery(f"INSERT INTO works_in (d_phone, h_id) VALUES ({phone}, {h_id});")
+        context['success']='Doctor added successfully'
+        return render(request, 'main/new_doctor.html', context)
+    
