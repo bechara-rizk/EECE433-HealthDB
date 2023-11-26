@@ -40,6 +40,9 @@
                     "<p>Number of different insurance plans: " + stats["plans"] + "</p>";
             }
         };
+        xhttp.onerror = function() {
+            alert("An error occurred while trying to get the statistics.");
+        }
     }
 </script>
 {% endblock %}

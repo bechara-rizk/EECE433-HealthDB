@@ -1,0 +1,83 @@
+{% extends "main/default.html" %}
+
+{% block title %}View broker info{% endblock %}
+
+{% block css %}
+<style>
+    .input-group {
+        max-width: 400px;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<h2>View information about a broker</h2>
+
+<form method="POST" onsubmit="return false;">
+    {% csrf_token %}
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Broker</span>
+        <select name="bro" required class="form-select" id="brochoice">
+            <option value="">Choose a broker</option>
+            {% for broker in brokers %}
+                <option value="{{broker}}">{{broker}}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <button type="" class="btn btn-primary" onclick="getinfo()">Submit</button>
+
+</form>
+<br>
+<div id="info">
+
+</div>
+
+{% endblock %}
+
+
+{% block js %}
+<script>
+    function getinfo() {
+        var bro = document.getElementById("brochoice").value;
+        if (bro != "") {
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("POST", "/healthdb/viewbro/", true);
+            xmlhttp.setRequestHeader("X-CSRFToken", "{{csrf_token}}");
+
+            xmlhttp.send(JSON.stringify({
+                "bro": bro
+            }));
+            xmlhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var data = JSON.parse(this.responseText);
+                    var text="";
+                    text+= "<h6>Name: " + data["name"] + "</h6>"+
+                    "<h6>Address: "+ data["address"] + "</h6>"+
+                    "<h6>Phone number: "+ data["phone"] + "</h6>"+
+                    "<h6>Date started: "+ data["start_date"] + "</h6>";
+                    if (data["end_date"] != null) {
+                        text+= "<h6>Date ended: "+ data["end_date"] + "</h6>";
+                    }
+                    text+= "<h6>Commission: "+ data["commission"] + "%</h6>"+
+                    "<h6>Number of customers: "+ data["nb_of_customers_brought"] + "</h6>";
+                    if (data["nb_of_customers_brought"] > 0) {
+                        text+= "<h6>Customers brought: </h6><ul>";
+                        for (var i = 0; i < data["customers"].length; i++) {
+                            text+= "<li>"+ data["customers"][i] + "</li>";
+                        }
+                        text+= "</ul>";
+                    }
+
+                    document.getElementById("info").innerHTML = text;
+                }
+            }
+            xmlhttp.onerror = function() {
+                alert("An error occurred while trying to get the information.");
+            }
+        }
+    }
+</script>
+{% endblock %}

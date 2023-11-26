@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from .dbrequests import sendQuery, callFunction, callProcedure
 import re
+from json import loads
+import datetime
 
 # Create your views here.
 def index(request):
@@ -502,3 +504,170 @@ def newdoctor(request):
         context['success']='Doctor added successfully'
         return render(request, 'main/new_doctor.html', context)
     
+def viewdep(request):
+    if request.method == 'GET':
+        context=dict()
+        departments=sendQuery("SELECT name FROM department;")
+        context['departments']=[department[0] for department in departments]
+        return render(request, 'main/viewdep.html', context)
+    
+    if request.method == 'POST':
+        context=dict()
+        body=request.body.decode('utf-8')
+        body=loads(body)
+        department=body['dep']
+        # print(department)
+        info=sendQuery(f"SELECT name, extension, floor_number, nb_of_employees, manager_ssn FROM department WHERE name='{department}';")
+        # print(info)
+        name=info[0][0]
+        extension=info[0][1]
+        floor_number=info[0][2]
+        nb_of_employees=info[0][3]
+        manager_ssn=info[0][4]
+        context['name']=name
+        context['extension']=extension
+        context['floor_number']=floor_number
+        context['nb_of_employees']=nb_of_employees
+        context['manager_ssn']=manager_ssn
+
+        managername=sendQuery(f"SELECT first_name, last_name FROM employee_table WHERE ssn={manager_ssn};")
+        managername=managername[0][0]+' '+managername[0][1]
+        context['managername']=managername
+
+        employees=sendQuery(f"SELECT ssn, first_name, last_name FROM employee_table WHERE d_name='{department}';")
+        context['employees']=employees
+        
+        return JsonResponse(context)
+
+def viewemp(request):
+    if request.method == 'GET':
+        context=dict()
+        employees=sendQuery("SELECT ssn, first_name, last_name FROM employee_table;")
+        context['employees']=[employee[1]+' '+employee[2]+', '+str(employee[0]) for employee in employees]
+        return render(request, 'main/viewemp.html', context)
+    
+    if request.method == 'POST':
+        context=dict()
+        body=request.body.decode('utf-8')
+        body=loads(body)
+        employee=body['emp']
+        try:
+            employeessn=int(employee.split(', ')[1])
+        except:
+            employeessn=-1
+        # print(employeessn)
+        info=sendQuery(f"SELECT ssn, first_name, last_name, phone, extension, date_hired, address, salary, dob, su_ssn, d_name FROM employee_table WHERE ssn={employeessn};")
+        ssn=info[0][0]
+        first_name=info[0][1]
+        last_name=info[0][2]
+        phone=info[0][3]
+        extension=info[0][4]
+        date_hired=info[0][5]
+        address=info[0][6]
+        salary=info[0][7]
+        dob=info[0][8]
+        su_ssn=info[0][9]
+        d_name=info[0][10]
+        context['ssn']=ssn
+        context['first_name']=first_name
+        context['last_name']=last_name
+        context['phone']=phone
+        context['extension']=extension
+        context['date_hired']=datetime.datetime.strftime(date_hired, "%B %d, %Y")
+        context['address']=address
+        context['salary']=salary
+        context['dob']=datetime.datetime.strftime(dob, "%B %d, %Y")
+        context['su_ssn']=su_ssn
+        context['d_name']=d_name
+
+
+        if su_ssn:
+            supname=sendQuery(f"SELECT first_name, last_name FROM employee_table WHERE ssn={su_ssn};")
+            supname=supname[0][0]+' '+supname[0][1]
+            context['supname']=supname
+        
+        return JsonResponse(context)
+
+
+def viewbro(request):
+    if request.method == 'GET':
+        context=dict()
+        brokers=sendQuery("SELECT phone, name FROM broker_table;")
+        context['brokers']=[broker[1]+', '+str(broker[0]) for broker in brokers]
+        return render(request, 'main/viewbro.html', context)
+    
+    if request.method == 'POST':
+        context=dict()
+        body=request.body.decode('utf-8')
+        body=loads(body)
+        broker=body['bro']
+        try:
+            brokerphone=int(broker.split(', ')[1])
+        except:
+            brokerphone=-1
+        # print(brokerphone)
+        info=sendQuery(f"SELECT phone, start_date, end_date, address, commission, name, nb_of_customers_brought FROM broker WHERE phone={brokerphone};")
+        phone=info[0][0]
+        start_date=info[0][1]
+        end_date=info[0][2]
+        address=info[0][3]
+        commission=info[0][4]
+        name=info[0][5]
+        nb_of_customers_brought=info[0][6]
+        context['phone']=phone
+        context['start_date']=datetime.datetime.strftime(start_date, "%B %d, %Y")
+        if end_date:
+            context['end_date']=datetime.datetime.strftime(end_date, "%B %d, %Y")        
+        context['address']=address
+        context['commission']=commission
+        context['name']=name
+        context['nb_of_customers_brought']=nb_of_customers_brought
+        customers=sendQuery(f"SELECT ssn, first_name, last_name FROM customer_table WHERE b_phone={phone};")
+        context['customers']=[customer[1]+' '+customer[2]+', '+str(customer[0]) for customer in customers]
+
+        return JsonResponse(context)
+
+def viewcus(request):
+    pass
+
+def viewdoc(request):
+    pass
+
+def viewhos(request):
+    pass
+
+def viewlab(request):
+    if request.method == 'GET':
+        context=dict()
+        labs=sendQuery("SELECT id, name FROM lab;")
+        context['labs']=[lab[1]+', '+str(lab[0]) for lab in labs]
+        return render(request, 'main/viewlab.html', context)
+    
+    if request.method == 'POST':
+        context=dict()
+        body=request.body.decode('utf-8')
+        body=loads(body)
+        lab=body['lab']
+        try:
+            labid=int(lab.split(', ')[1])
+        except:
+            labid=-1
+        # print(labid)
+        info=sendQuery(f"SELECT id, name, representative, phone FROM lab WHERE id={labid};")
+        id=info[0][0]
+        name=info[0][1]
+        representative=info[0][2]
+        phone=info[0][3]
+        context['id']=id
+        context['name']=name
+        context['representative']=representative
+        context['phone']=phone
+        locations=sendQuery(f"SELECT location FROM lab_location WHERE lab_id={id};")
+        context['locations']=[location[0] for location in locations]
+        plans=sendQuery(f"SELECT DISTINCT plan_identifier FROM accepts WHERE lab_id={id} ORDER BY plan_identifier;")
+        context['plans']=[plan[0] for plan in plans]
+
+        return JsonResponse(context)
+
+def viewins(request):
+    pass

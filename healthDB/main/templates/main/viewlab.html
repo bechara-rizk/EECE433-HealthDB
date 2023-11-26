@@ -1,0 +1,82 @@
+{% extends "main/default.html" %}
+
+{% block title %}View lab info{% endblock %}
+
+{% block css %}
+<style>
+    .input-group {
+        max-width: 400px;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<h2>View information about a lab</h2>
+
+<form method="POST" onsubmit="return false;">
+    {% csrf_token %}
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Lab</span>
+        <select name="lab" required class="form-select" id="labchoice">
+            <option value="">Choose a lab</option>
+            {% for lab in labs %}
+                <option value="{{lab}}">{{lab}}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <button type="" class="btn btn-primary" onclick="getinfo()">Submit</button>
+
+</form>
+<br>
+<div id="info">
+
+</div>
+
+{% endblock %}
+
+
+{% block js %}
+<script>
+    function getinfo() {
+        var lab = document.getElementById("labchoice").value;
+        if (lab != "") {
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("POST", "/healthdb/viewlab/", true);
+            xmlhttp.setRequestHeader("X-CSRFToken", "{{csrf_token}}");
+
+            xmlhttp.send(JSON.stringify({
+                "lab": lab
+            }));
+            xmlhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var data = JSON.parse(this.responseText);
+                    var text="";
+                    text+= "<h6>Name: " + data["name"] + "</h6>"+
+                    "<h6>ID: "+ data["id"] + "</h6>"+
+                    "<h6>Representative: "+ data["representative"] + "</h6>"+
+                    "<h6>Phone number: "+ data["phone"] + "</h6>"+
+                    "<h6>Locations: </h6><ul>";
+                    for (var i = 0; i < data["locations"].length; i++) {
+                        text += "<li>" + data["locations"][i] + "</li>";
+                    }
+                    text += "</ul>"+
+                    "<h6>Covered by insurance plans: </h6><ul>";
+                    for (var i = 0; i < data["plans"].length; i++) {
+                        text += "<li>" + data["plans"][i] + "</li>";
+                    }
+                    text += "</ul>";
+
+
+                    document.getElementById("info").innerHTML = text;
+                }
+            }
+            xmlhttp.onerror = function() {
+                alert("An error occurred while trying to get the information.");
+            }
+        }
+    }
+</script>
+{% endblock %}

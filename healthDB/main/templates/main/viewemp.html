@@ -1,0 +1,79 @@
+{% extends "main/default.html" %}
+
+{% block title %}View employee info{% endblock %}
+
+{% block css %}
+<style>
+    .input-group {
+        max-width: 400px;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<h2>View information about an employee</h2>
+
+<form method="POST" onsubmit="return false;">
+    {% csrf_token %}
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Employee</span>
+        <select name="emp" required class="form-select" id="empchoice">
+            <option value="">Choose an employee</option>
+            {% for employee in employees %}
+                <option value="{{employee}}">{{employee}}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <button type="" class="btn btn-primary" onclick="getinfo()">Submit</button>
+
+</form>
+<br>
+<div id="info">
+
+</div>
+
+{% endblock %}
+
+
+{% block js %}
+<script>
+    function getinfo() {
+        var emp = document.getElementById("empchoice").value;
+        if (emp != "") {
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("POST", "/healthdb/viewemp/", true);
+            xmlhttp.setRequestHeader("X-CSRFToken", "{{csrf_token}}");
+
+            xmlhttp.send(JSON.stringify({
+                "emp": emp
+            }));
+            xmlhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var data = JSON.parse(this.responseText);
+                    var text="";
+                    text+= "<h6>SSN: " + data["ssn"] + "</h6>" +
+                        "<h6>Name: " + data["first_name"]+" "+ data["last_name"] + "</h6>" +
+                        "<h6>Address: " + data["address"] + "</h6>" +
+                        "<h6>Birthdate: "+ data["dob"]+"</h6>"+
+                        "<h6>Phone number: " + data["phone"] + "</h6>" +
+                        "<h6>Date hired: " + data["date_hired"] + "</h6>" +
+                        "<h6>Extension: " + data["extension"] + "</h6>" +
+                        "<h6>Salary: $" + data["salary"] + "</h6>" +
+                        "<h6>Department: " + data["d_name"] + "</h6>";
+                    if (data["su_ssn"] != null) {
+                        text += "<h6>Supervisor: " + data["supname"]+", "+ data["su_ssn"] + "</h6>";
+                    }
+
+                    document.getElementById("info").innerHTML = text;
+                }
+            }
+            xmlhttp.onerror = function() {
+                alert("An error occurred while trying to get the information.");
+            }
+        }
+    }
+</script>
+{% endblock %}

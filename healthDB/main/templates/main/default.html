@@ -19,6 +19,9 @@
     input[type=number] {
       -moz-appearance: textfield;
     }
+    .nav-link:focus, .nav-link:hover{
+      color: #ffffff;
+    }
   </style>
 
   {% block css %}
@@ -58,12 +61,17 @@
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Dropdown link
+              View info
             </a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-              <li><a class="dropdown-item" href="#">Action</a></li>
-              <li><a class="dropdown-item" href="#">Another action</a></li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
+              <li><a class="dropdown-item" href="/healthdb/viewdep/">Department</a></li>
+              <li><a class="dropdown-item" href="/healthdb/viewemp/">Employee</a></li>
+              <li><a class="dropdown-item" href="/healthdb/viewbro/">Broker</a></li>
+              <li><a class="dropdown-item" href="/healthdb/viewcus/">Customer & family</a></li>
+              <li><a class="dropdown-item" href="/healthdb/viewdoc/">Doctor & operations</a></li>
+              <li><a class="dropdown-item" href="/healthdb/viewhos/">Hospital</a></li>
+              <li><a class="dropdown-item" href="/healthdb/viewlab/">Lab</a></li>
+              <li><a class="dropdown-item" href="/healthdb/viewins/">Insurance plan</a></li>
             </ul>
           </li>
         </ul>
