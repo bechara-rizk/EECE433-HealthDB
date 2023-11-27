@@ -4,6 +4,7 @@ from .dbrequests import sendQuery, callFunction, callProcedure
 import re
 from json import loads
 import datetime
+from .checkstr import checkstr, cleanstr
 
 # Create your views here.
 def index(request):
@@ -254,6 +255,11 @@ def newemployee(request):
             context['error']='Date of birth must be in the format YYYY-MM-DD'
             return render(request, 'main/new_employee.html', context)
         
+        # check strings are clean
+        if not checkstr(first_name) or not checkstr(last_name) or not checkstr(address):
+            context['error']='Invalid characters in strings'
+            return render(request, 'main/new_employee.html', context)
+        
         # insert into database
         sendQuery(f"INSERT INTO employee_table (ssn, first_name, last_name, phone, extension, date_hired, address, salary, dob, su_ssn, d_name) VALUES ({ssn}, '{first_name}', '{last_name}', {phone}, {extension}, '{date_hired}', '{address}', {salary}, '{dob}', {su_ssn}, '{d_name}');")
         context['success']='Employee added successfully'
@@ -305,6 +311,11 @@ def newbroker(request):
             context['error']='Start date must be in the format YYYY-MM-DD'
             return render(request, 'main/new_broker.html', context)
         
+        # check strings are clean
+        if not checkstr(name) or not checkstr(address):
+            context['error']='Invalid characters in strings'
+            return render(request, 'main/new_broker.html', context)
+        
         # insert into database
         sendQuery(f"INSERT INTO broker_table (phone, start_date, address, commission, name) VALUES ({phone}, '{start_date}', '{address}', {commission}, '{name}');")
         context['success']='Broker added successfully'
@@ -340,6 +351,11 @@ def newcustomer(request):
         # check that all values are filled
         if not ssn or not first_name or not last_name or not phone or not dob or not address or not e_ssn or not date_of_assignment:
             context['error']='All fields must be filled'
+            return render(request, 'main/new_customer.html', context)
+        
+        # check strings are clean
+        if not checkstr(first_name) or not checkstr(last_name) or not checkstr(address):
+            context['error']='Invalid characters in strings'
             return render(request, 'main/new_customer.html', context)
         
         # check that ssn is unique and a number and not negative
@@ -418,6 +434,11 @@ def newfamilymember(request):
             context['error']='All fields must be filled'
             return render(request, 'main/new_fam_member.html', context)
         
+        # check strings are clean
+        if not checkstr(first_name) or not checkstr(last_name) or not checkstr(relation):
+            context['error']='Invalid characters in strings'
+            return render(request, 'main/new_fam_member.html', context)
+        
         # check that c_ssn is valid and a number
         try:
             c_ssn=int(c_ssn)
@@ -463,6 +484,11 @@ def newdoctor(request):
         # check that all values are filled
         if not phone or not specialization or not first_name or not last_name or not work_start or not nb_of_malpractices or not h_id:
             context['error']='All fields must be filled'
+            return render(request, 'main/new_doctor.html', context)
+        
+        # check strings are clean
+        if not checkstr(first_name) or not checkstr(last_name) or not checkstr(specialization):
+            context['error']='Invalid characters in strings'
             return render(request, 'main/new_doctor.html', context)
         
         # check that phone is unique and a number and not negative
@@ -517,8 +543,16 @@ def viewdep(request):
         body=loads(body)
         department=body['dep']
         # print(department)
+
+        department=cleanstr(department)
+
         info=sendQuery(f"SELECT name, extension, floor_number, nb_of_employees, manager_ssn FROM department WHERE name='{department}';")
         # print(info)
+
+        if len(info)==0:
+            context['error']='Department does not exist'
+            return JsonResponse(context)
+
         name=info[0][0]
         extension=info[0][1]
         floor_number=info[0][2]
@@ -552,11 +586,19 @@ def viewemp(request):
         body=loads(body)
         employee=body['emp']
         try:
-            employeessn=int(employee.split(', ')[1])
+            employeessn=employee.split(', ')
+            if len(employeessn)!=2:
+                raise Exception()
+            employeessn=int(employeessn[1])
         except:
             employeessn=-1
         # print(employeessn)
         info=sendQuery(f"SELECT ssn, first_name, last_name, phone, extension, date_hired, address, salary, dob, su_ssn, d_name FROM employee_table WHERE ssn={employeessn};")
+        
+        if len(info)==0:
+            context['error']='Employee does not exist'
+            return JsonResponse(context)
+        
         ssn=info[0][0]
         first_name=info[0][1]
         last_name=info[0][2]
@@ -602,11 +644,19 @@ def viewbro(request):
         body=loads(body)
         broker=body['bro']
         try:
-            brokerphone=int(broker.split(', ')[1])
+            brokerphone=broker.split(', ')
+            if len(brokerphone)!=2:
+                raise Exception()
+            brokerphone=int(brokerphone[1])
         except:
             brokerphone=-1
         # print(brokerphone)
         info=sendQuery(f"SELECT phone, start_date, end_date, address, commission, name, nb_of_customers_brought FROM broker WHERE phone={brokerphone};")
+        
+        if len(info)==0:
+            context['error']='Broker does not exist'
+            return JsonResponse(context)
+        
         phone=info[0][0]
         start_date=info[0][1]
         end_date=info[0][2]
@@ -640,11 +690,19 @@ def viewcus(request):
         body=loads(body)
         customer=body['cus']
         try:
-            customerssn=int(customer.split(', ')[1])
+            customerssn=customer.split(', ')
+            if len(customerssn)!=2:
+                raise Exception()
+            customerssn=int(customerssn[1])
         except:
             customerssn=-1
         # print(customerssn)
         info=sendQuery(f"SELECT ssn, first_name, last_name, phone, dob, address, b_phone, e_ssn, date_of_assignment FROM customer_table WHERE ssn={customerssn};")
+        
+        if len(info)==0:
+            context['error']='Customer does not exist'
+            return JsonResponse(context)
+        
         ssn=info[0][0]
         first_name=info[0][1]
         last_name=info[0][2]
@@ -706,11 +764,19 @@ def viewdoc(request):
         body=loads(body)
         doctor=body['doc']
         try:
-            doctorphone=int(doctor.split(', ')[1])
+            doctorphone=doctor.split(', ')
+            if len(doctorphone)!=2:
+                raise Exception()
+            doctorphone=int(doctorphone[1])
         except:
             doctorphone=-1
         # print(doctorphone)
         info=sendQuery(f"SELECT phone, specialization, first_name, last_name, years_worked, nb_of_malpractices FROM doctor WHERE phone={doctorphone};")
+        
+        if len(info)==0:
+            context['error']='Doctor does not exist'
+            return JsonResponse(context)
+        
         phone=info[0][0]
         specialization=info[0][1]
         first_name=info[0][2]
@@ -755,11 +821,19 @@ def viewhos(request):
         body=loads(body)
         hospital=body['hos']
         try:
-            hospitalid=int(hospital.split(', ')[1])
+            hospitalid=hospital.split(', ')
+            if len(hospitalid)!=2:
+                raise Exception()
+            hospitalid=int(hospitalid[1])
         except:
             hospitalid=-1
         # print(hospitalid)
         info=sendQuery(f"SELECT id, phone, name, representative, location FROM hospital WHERE id={hospitalid};")
+        
+        if len(info)==0:
+            context['error']='Hospital does not exist'
+            return JsonResponse(context)
+        
         id=info[0][0]
         phone=info[0][1]
         name=info[0][2]
@@ -797,11 +871,19 @@ def viewlab(request):
         body=loads(body)
         lab=body['lab']
         try:
-            labid=int(lab.split(', ')[1])
+            labid=lab.split(', ')
+            if len(labid)!=2:
+                raise Exception()
+            labid=int(labid[1])
         except:
             labid=-1
         # print(labid)
         info=sendQuery(f"SELECT id, name, representative, phone FROM lab WHERE id={labid};")
+        
+        if len(info)==0:
+            context['error']='Lab does not exist'
+            return JsonResponse(context)
+        
         id=info[0][0]
         name=info[0][1]
         representative=info[0][2]
@@ -829,8 +911,16 @@ def viewins(request):
         body=request.body.decode('utf-8')
         body=loads(body)
         plan=body['ins']
+
+        plan=cleanstr(plan)
+
         # print(plan)
         info=sendQuery(f"SELECT id, type, name, description, price, start_age, end_age, percentage_paid, time_limit, financial_limit FROM insurance_plan WHERE name='{plan}';")
+        
+        if len(info)==0:
+            context['error']='Insurance plan does not exist'
+            return JsonResponse(context)
+        
         context['name']=info[0][2]
         context['type']=info[0][1]
         context['description']=info[0][3]
@@ -952,6 +1042,8 @@ def recope(request):
         if not description:
             context['error']='Description must be filled'
 
+        description=cleanstr(description)
+
         # check that customer ssn is valid
         try:
             customerssn=int(customer.split(', ')[1])
@@ -1020,6 +1112,8 @@ def reclab(request):
 
         if not description:
             context['error']='Description must be filled'
+
+        description=cleanstr(description)
 
         # check that customer ssn is valid
         try:
