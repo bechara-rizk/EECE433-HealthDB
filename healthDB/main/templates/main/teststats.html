@@ -1,0 +1,48 @@
+{% extends "main/default.html" %}
+
+{% block title %}View tests statictics{% endblock %}
+
+{% block css %}
+<style>
+    .tableheight{
+        max-height: 400px;
+        overflow-y: scroll;
+
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<h2>View statistics about tests performed</h2>
+{% load humanize %}
+
+<div class="tableheight">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Test description</th>
+                <th scope="col">Time performed</th>
+                <th scope="col">Average price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for line in tests %}
+            <tr>
+                <th scope="row">{{line.0}}</th>
+                <td>{{line.1}}</td>
+                <td>{{line.2|intcomma}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+
+
+{% block js %}
+<script>
+
+</script>
+{% endblock %}

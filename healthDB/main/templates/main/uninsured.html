@@ -1,0 +1,46 @@
+{% extends "main/default.html" %}
+
+{% block title %}View uninsured customers{% endblock %}
+
+{% block css %}
+<style>
+    .tableheight{
+        max-height: 400px;
+        overflow-y: scroll;
+
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<h2>View uninsured customers</h2>
+
+<h5>Customers who are not currently insured</h5>
+<div class="tableheight">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">SSN</th>
+                <th scope="col">Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for line in uninsured %}
+            <tr>
+                <th scope="row">{{line.0}}</th>
+                <td>{{line.1}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+
+
+{% block js %}
+<script>
+
+</script>
+{% endblock %}

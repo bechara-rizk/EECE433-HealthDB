@@ -28,6 +28,5 @@ urlpatterns = [
     path('uninsured/', views.uninsured, name='uninsured'),
     path('customerservice/', views.customerservice, name='customerservice'),
     path('teststats/', views.teststats, name='teststats'),
-    path('operationstats/', views.operationstats, name='operationstats'),
     path('doctorstats/', views.doctorstats, name='doctorstats'),
 ]

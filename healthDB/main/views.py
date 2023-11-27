@@ -677,6 +677,20 @@ def viewcus(request):
         familymembers=sendQuery(f"SELECT first_name, last_name, age, relation FROM family_member WHERE c_ssn={ssn};")
         context['familymembers']=familymembers
 
+        numberfamilymembers=sendQuery(f"""SELECT c.ssn AS "Customer SSN",c.first_name||' '||c.last_name AS "Customer full name",
+COUNT(f.*)+1 AS "Number of members"
+FROM customer_table c, family_member_table f
+WHERE c.ssn=f.c_ssn AND c.ssn={ssn}
+GROUP BY c.ssn
+UNION
+SELECT c2.ssn AS "Customer SSN",c2.first_name||' '||c2.last_name AS "Customer full name",
+1 AS "Number of members"
+FROM customer_table c2
+WHERE c2.ssn NOT IN (SELECT DISTINCT c_ssn FROM family_member_table) AND c2.ssn={ssn}
+GROUP BY c2.ssn
+ORDER BY "Number of members" DESC;""")[0][2]-1
+        context['numberfamilymembers']=numberfamilymembers
+
         return JsonResponse(context)
 
 def viewdoc(request):
@@ -1065,19 +1079,77 @@ WHERE ((b.still_due > 0) AND (b.date+days_to_pay < CURRENT_DATE));""")
     return render(request, 'main/overdue.html', context)
 
 def financial(request):
-    pass
+    context=dict()
+    average=sendQuery("""SELECT c.ssn AS "Customer SSN",c.first_name||' '||c.last_name AS "Customer full name",
+COALESCE(ROUND(AVG(t.price),1),0) AS "Average cost on tests", 
+COALESCE(ROUND(AVG(o.price),1),0) AS "Average cost on operations"
+FROM customer c 
+LEFT JOIN tests t ON c.ssn=t.c_ssn
+LEFT JOIN operates_on o ON c.ssn=o.c_ssn
+GROUP BY "Customer SSN", "Customer full name"
+ORDER BY c.ssn;""")
+    totalcost=sendQuery("""SELECT c.ssn AS "Customer SSN",c.first_name||' '||c.last_name AS "Customer full name",
+COALESCE(ROUND(AVG(t.price),1),0) + COALESCE(ROUND(AVG(o.price),1),0) 
+AS "Total cost of customer"
+FROM customer c 
+LEFT JOIN tests t ON c.ssn=t.c_ssn
+LEFT JOIN operates_on o ON c.ssn=o.c_ssn
+GROUP BY "Customer SSN", "Customer full name"
+ORDER BY "Total cost of customer" DESC LIMIT 5;""")
+    totalpaid=sendQuery("""SELECT c.ssn AS "Customer SSN",c.first_name||' '||c.last_name AS "Customer full name",
+COALESCE(SUM(p.amount_paid), 0) AS "Total amount paid"
+FROM customer_table c
+LEFT JOIN pays p ON c.ssn = p.c_ssn
+GROUP BY "Customer SSN", "Customer full name"
+ORDER BY "Total amount paid" DESC LIMIT 5;""")
+    context['average']=average
+    context['totalcost']=totalcost
+    context['totalpaid']=totalpaid
+    return render(request, 'main/financial.html', context)
 
 def uninsured(request):
-    pass
+    context=dict()
+    uninsured=sendQuery("""SELECT c.ssn AS "Customer SSN",c.first_name||' '||c.last_name AS "Customer full name"
+FROM customer_table c
+WHERE c.ssn NOT IN (SELECT DISTINCT c_ssn FROM insures)
+OR c.ssn NOT IN (
+    SELECT c_ssn FROM insures i
+    LEFT JOIN insurance_plan p ON i.plan_identifier = p.id
+    WHERE i.date_activated + p.time_limit > CURRENT_DATE
+);""")
+    context['uninsured']=uninsured
+    return render(request, 'main/uninsured.html', context)
 
 def customerservice(request):
-    pass
+    context=dict()
+    customers=sendQuery("""SELECT e.ssn AS "Employee SSN", e.first_name || ' ' || e.last_name 
+AS "Employee Full Name", COUNT(DISTINCT c.ssn) AS "Number of Serviced Customers"
+FROM employee_table e
+LEFT JOIN customer_table c ON c.e_ssn=e.ssn
+WHERE e.d_name='Customer Service'
+GROUP BY e.ssn
+ORDER BY "Number of Serviced Customers" DESC;""")
+    context['customers']=customers
+    return render(request, 'main/customerservice.html', context)
 
 def teststats(request):
-    pass
-
-def operationstats(request):
-    pass
+    context=dict()
+    tests=sendQuery("""SELECT description AS "Test description", count(*) AS "Times Performed",
+ROUND(AVG(price),1) AS "Average Test Price"
+FROM tests
+GROUP BY description
+ORDER BY "Times Performed" DESC;""")
+    context['tests']=tests
+    return render(request, 'main/teststats.html', context)
 
 def doctorstats(request):
-    pass
+    context=dict()
+    doctors=sendQuery("""SELECT d.phone AS "Doctor phone nb", d.first_name||' '||d.last_name AS "Doctor name",
+COALESCE(h.name,'N/A') AS "Hospital name", COUNT(o.*) AS "Nb of operations"
+FROM doctor_table d
+LEFT JOIN operates_on o ON d.phone = o.d_phone
+LEFT JOIN hospital h ON o.h_id = h.id
+GROUP BY "Doctor phone nb", "Doctor name", "Hospital name"
+ORDER BY "Nb of operations" DESC;""")
+    context['doctors']=doctors
+    return render(request, 'main/doctorstats.html', context)

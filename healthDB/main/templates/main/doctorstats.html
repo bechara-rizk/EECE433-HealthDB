@@ -1,0 +1,46 @@
+{% extends "main/default.html" %}
+
+{% block title %}View operations statictics{% endblock %}
+
+{% block css %}
+<style>
+</style>
+{% endblock %}
+
+
+{% block content %}
+<h2>View statistics about operations performed</h2>
+{% load humanize %}
+
+<h5>View how many operations are made by every doctor at every hospital</h5>
+<div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Phone number</th>
+                <th scope="col">Doctor name</th>
+                <th scope="col">Hospital name</th>
+                <th scope="col">Number of operations</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for line in doctors %}
+            <tr>
+                <th scope="row">{{line.0}}</th>
+                <td>{{line.1}}</td>
+                <td>{{line.2}}</td>
+                <td>{{line.3|intcomma}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+
+
+{% block js %}
+<script>
+
+</script>
+{% endblock %}

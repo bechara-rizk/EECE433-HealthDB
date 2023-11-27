@@ -67,6 +67,7 @@
                     text+="<h6>Employee: "+data["employee"]+"</h6>"+
                     "<h6>Employee assigned on: "+data["date_of_assignment"]+"</h6>";
                     if (data["familymembers"].length > 0) {
+                        text+="<h6>Number of family members: "+data["numberfamilymembers"]+"</h6>";
                         text+= "<h6>Family members: </h6><ul>";
                         for (var i=0; i<data["familymembers"].length; i++) {
                             text+="<li>"+data["familymembers"][i][0]+" "+data["familymembers"][i][1]+", "+data["familymembers"][i][2]+" years old,"+ data["familymembers"][i][3]+"</li>";

@@ -1,0 +1,97 @@
+{% extends "main/default.html" %}
+
+{% block title %}View financial information{% endblock %}
+
+{% block css %}
+<style>
+    .tableheight{
+        max-height: 400px;
+        overflow-y: scroll;
+
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<h2>View financial information</h2>
+{% load humanize %}
+
+<h5>Average cost of customer per test and operation</h5>
+<div class="tableheight">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">SSN</th>
+                <th scope="col">Name</th>
+                <th scope="col">Avg test cost ($)</th>
+                <th scope="col">Avg operation cost ($)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for line in average %}
+            <tr>
+                <th scope="row">{{line.0}}</th>
+                <td>{{line.1}}</td>
+                <td>{{line.2|intcomma}}</td>
+                <td>{{line.3|intcomma}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<br>
+<div class="tableheight">
+    <h5>Top 5 most expensive customers</h5>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">SSN</th>
+                <th scope="col">Name</th>
+                <th scope="col">Amount ($)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for line in totalcost %}
+            <tr>
+                <th scope="row">{{line.0}}</th>
+                <td>{{line.1}}</td>
+                <td>{{line.2|intcomma}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<br>
+<h5>Top 5 customers who paid the most</h5>
+<div class="tableheight">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">SSN</th>
+                <th scope="col">Name</th>
+                <th scope="col">Amount ($)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for line in totalpaid %}
+            <tr>
+                <th scope="row">{{line.0}}</th>
+                <td>{{line.1}}</td>
+                <td>{{line.2|intcomma}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+
+
+{% block js %}
+<script>
+
+</script>
+{% endblock %}
